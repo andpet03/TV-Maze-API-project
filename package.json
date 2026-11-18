@@ -1,12 +1,14 @@
 {
-  "name": "episode-atlas",
-  "version": "1.0.0",
+  "name": "atlas",
+  "version": "2.2.0",
   "private": true,
-  "description": "A TVmaze API explorer with episode tracking and a sequential viewing-time planner.",
+  "description": "A personal TV companion with genre and premiere-year discovery, ranked favourites and episode tracking.",
   "scripts": {
-    "test": "node --test tests/core.test.cjs tests/api.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/api.test.cjs tests/discovery.test.cjs tests/catalogue.test.cjs tests/spin.test.cjs",
     "test:browser": "node tests/browser.cjs",
-    "check": "node --check js/core.js && node --check js/api.js && node --check js/app.js"
+    "check": "node --check js/core.js && node --check js/api.js && node --check js/app.js && node --check js/discovery.js && node --check js/catalogue.js && node --check js/spin.js"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
