@@ -23,4 +23,4 @@ The production app has no third-party JavaScript or CSS packages. Optional brows
 
 ## AI assistance
 
-The implementation and documentation were developed with AI assistance. The submitting student should review and understand the project and follow their institution's disclosure requirements.
+AI assistance was used in developing the application code, tests and documentation.

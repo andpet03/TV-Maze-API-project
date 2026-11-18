@@ -1,69 +1,76 @@
 # ATLAS
 
-**Your world of stories.** Version 2.2.
+**Your world of stories.**
 
-A TV companion with a cinematic welcome page, rotating show posters, genre and premiere-year discovery, a personal ranked top five, watchlists, episode tracking, spoiler control and an evening planner.
-
-## Run the app
-
-Extract the ZIP, open `episode-atlas`, then double-click `index.html`. Keep the folders together. Internet access is required for shows and images. No API key or installation is needed.
-
-For consistent browser storage, serve the folder locally or use GitHub Pages. On Windows, open the folder in File Explorer, type `powershell` in the address bar, press Enter and run:
-
-```powershell
-py -m http.server 8000
-```
-
-Visit http://localhost:8000. Keep that terminal open; Ctrl+C stops it.
-
-## Update your existing GitHub repository
-
-1. Optionally download a personal backup from the old app first.
-2. Extract this ZIP into a new folder; test its `index.html`.
-3. Open the SAME repository and folder containing the old `index.html`.
-4. Choose **Add file → Upload files**.
-5. Drag all CONTENTS of the new `episode-atlas` folder into the upload area, keeping subfolders intact. Do not upload the ZIP or create a second nested `episode-atlas` folder.
-6. Commit with `Redesign ATLAS with discovery and top-five favourites`.
-7. GitHub Pages republishes from your configured branch. After deployment, refresh the website with Ctrl+F5.
-
-No files need deleting. The new `js/discovery.js` must be uploaded alongside the updated files. Keep your existing Pages branch/folder settings. Website and repository names do not need to change for the visible brand to become ATLAS.
+ATLAS is a browser-based TV companion for discovering series, tracking viewing progress and finding episodes that fit the time available. Built with HTML, CSS and vanilla JavaScript, it retrieves show and episode information from TVmaze and stores personal collections locally in the browser.
 
 ## Features
 
-- Rotating poster wall (8-second interval), pause control, reduced-motion preference support.
-- Top five: star any show, reorder with arrows, remove and replace favourites. Kept near the top of every screen, independent of the watchlist.
-- Separate genre and premiere-year discovery screens, category shortcuts, combined filters and rating/date/title sorting.
-- Automatic full-catalogue loading in batches of up to 250 shows, with no loading buttons. Results expand while loading; title search stays independent. A complete catalogue is cached in IndexedDB for 24 hours when browser storage is available.
-- All listed episodes including specials; season, title and watch-state filters; pagination.
-- Watchlist, aired-episode progress, spoiler control and a sequential time-budget planner.
-- Version 2 JSON backups include ranked favourites; version 1 backups remain importable.
-- No API-learning panels in the interface. Required TVmaze attribution remains in the footer.
-
-## Files
-
-| Path | Purpose |
+| Feature | Description |
 | --- | --- |
-| `index.html` | App screens and accessible navigation |
-| `css/styles.css` | Responsive design |
-| `js/app.js` | Browser interactions and rendering |
-| `js/catalogue.js` | Automatic pagination and optional 24-hour IndexedDB cache |
-| `js/discovery.js` | Catalogue filters, ranking and backup migration |
-| `js/core.js` | Episode filters, progress and planning |
-| `js/api.js` | HTTP requests, cache, timeout and retry |
-| `tests/` | Automated logic tests and optional browser suite |
-| `docs/` | User guide, report, demo and validation record |
-| `.github/workflows/tests.yml` | Automated checks on GitHub |
+| Discovery | Search by title or browse by genre and premiere year. |
+| Stable browsing | New catalogue matches join the end of the current list without displacing existing cards. More cards appear on scroll. |
+| Personal top five | Save and reorder a ranked selection of five favourite shows. |
+| Watchlist and progress | Track watched episodes and identify the next unwatched regular episode. |
+| Episode guide | Filter by season, title and viewing status, with optional specials and spoiler protection. |
+| Tonight’s plan | Build a sequential viewing plan within a selected time budget. |
+| Spin the wheel | Receive a random show's unwatched episode plan matching a genre and available time. |
+| Backup and restore | Export and import watchlists, favourites and episode progress. |
+| Cinematic welcome | Rotating show posters, a pause control and support for reduced-motion preferences. |
 
-## Development
+ATLAS provides discovery and planning tools; it does not stream video.
 
-Requires Node.js 20+ for tests only; production has no dependencies or build step.
+## Running locally
+
+From the project directory, start a static HTTP server:
+
+```sh
+python -m http.server 8000
+```
+
+On Windows, `py` can replace `python`; on macOS/Linux, `python3` may be required. Open [localhost:8000](http://localhost:8000). A modern browser and internet access are required. There are no production dependencies, API keys or build steps.
+
+The application can also be hosted on a static web service such as GitHub Pages. Serve `index.html` with its accompanying `css`, `js` and `assets` directories.
+
+## Architecture
+
+| Module | Responsibility |
+| --- | --- |
+| `index.html` | Application screens, navigation and forms |
+| `css/styles.css` | Responsive layout and visual presentation |
+| `js/app.js` | UI rendering, interactions and personal state |
+| `js/api.js` | HTTP requests, cancellation, timeout, retry and request cache |
+| `js/catalogue.js` | Automatic catalogue loading and 24-hour browser cache |
+| `js/discovery.js` | Catalogue filtering, stable queues, ranking and backup validation |
+| `js/core.js` | Episode filtering, watched progress and sequential planning |
+| `js/spin.js` | Random candidate selection and time-constrained recommendations |
+| `tests/` | Automated logic tests and optional browser tests |
+| `.github/workflows/tests.yml` | Continuous integration checks |
+
+## Data and storage
+
+Show metadata and episode information come from the [TVmaze API](https://www.tvmaze.com/api). Title search operates independently of catalogue loading. The full catalogue loads automatically in batches; only completed catalogues are cached in IndexedDB for up to 24 hours when browser storage is available.
+
+Watchlists, top-five rankings and watched episode IDs are stored in localStorage. There are no user accounts or automatic cross-device synchronisation. Backups support transferring personal collections between browsers. Clearing browser storage removes local personal data.
+
+## Recommendation behaviour
+
+Tonight’s plan follows unwatched aired episodes in order, stopping when the next episode exceeds the budget or its runtime is unknown. Runtime estimates and specials are optional in that planner.
+
+Spin the wheel shuffles the available shows matching the selected genre and scope, then checks up to 30 candidates for a fitting plan. It uses known runtimes and regular aired episodes only, with a 60-second search deadline. Unrecorded viewing history is treated as unwatched. Recommendations do not automatically mark episodes watched.
+
+## Testing
+
+Node.js 20 or newer is required for development checks:
 
 ```sh
 npm test
 npm run check
 ```
 
-Optional browser checks:
+These commands require no installed npm dependencies. The validation record contains **37 passing automated logic tests**, JavaScript syntax checks and static asset-reference checks.
+
+Optional browser tests use Playwright:
 
 ```sh
 npm install --no-save playwright
@@ -71,16 +78,26 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-See `docs/TESTING.md` for verification limits. Source: https://www.tvmaze.com/api. No backend or secret key. Code is MIT licensed; TVmaze data and images have separate attribution/licensing requirements described in `ATTRIBUTION.md`.
+Browser automation could not be executed successfully in the build environment because Chromium startup was restricted. Visual, live-service and cross-browser acceptance checks remain unverified. Details are recorded in [Testing and verification](docs/TESTING.md).
 
-Personal data stays in this browser, on this website origin. No accounts or automatic cross-device sync. Existing watchlist data is preserved when replacing files at the same website address. A different browser, local-file address or hosting origin may require exporting/importing a backup. The first full-catalogue load can take several minutes and substantial memory. Complete catalogues are cached for 24 hours where IndexedDB is available; blocked storage falls back to in-tab data.
+## Limitations
 
-This project was developed with AI assistance. Review the code, explain the design and disclose assistance according to your course requirements.
+- Initial catalogue loading can take several minutes; filters cover the titles available so far.
+- The active browse list preserves its order as new batches arrive. A selected sort is applied to the initial selection and incoming batches, not globally reapplied during loading.
+- Metadata, artwork, dates and runtimes depend on TVmaze coverage.
+- Random recommendations use the available candidate pool and are not an exhaustive search of every possible viewing plan.
+- Personal storage is specific to the browser and website origin. Catalogue caching is optional and may be unavailable under restrictive browser settings.
 
-## New in 2.2
+## Documentation
 
-Genre/year browsing is now a stable, growing list. Newly downloaded matches append after existing entries, without replacing their DOM nodes or reshuffling cards. Scrolling reveals more results and a three-dot **Downloading titles…** indicator appears at the bottom while the catalogue is incomplete. Changing filters or sorting starts a fresh list. The current sort order is not reapplied globally when a new batch arrives.
+- [User guide](docs/USER_GUIDE.md)
+- [Technical project report](docs/PROJECT_REPORT.md)
+- [Feature walkthrough](docs/DEMO_SCRIPT.md)
+- [Testing and verification](docs/TESTING.md)
+- [Attribution](ATTRIBUTION.md)
 
-**Spin the wheel** lets users select 1–1,440 minutes, a genre and either all discovered shows or their watchlist. It shuffles a snapshot of available candidates and checks up to 30 shows for a sequence of aired, unwatched regular episodes that fits. Runtime estimates and specials are excluded. A 60-second deadline and cancel button bound the search; failures are reported without claiming that no match exists anywhere. Watched status comes only from this user's saved progress. A recommendation does not automatically mark episodes watched.
+## Licence and development acknowledgement
 
-`js/spin.js` implements random selection and is covered by `tests/spin.test.cjs`. No account or streaming service connection is required.
+Application code is distributed under the [MIT licence](LICENSE). TVmaze data and artwork are subject to separate attribution and licensing terms described in [ATTRIBUTION.md](ATTRIBUTION.md).
+
+AI assistance was used in developing the application code, tests and documentation.
