@@ -1,0 +1,10 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const D=require('../js/discovery.js'),C=require('../js/core.js');
+const a={id:1,name:'Alpha',genres:['Drama','Crime'],premiered:'2020-01-01',rating:{average:8}},b={id:2,name:'Beta',genres:['Drama'],premiered:'2022-01-01',rating:{average:9}},c={id:3,name:'Gamma',genres:[],premiered:null};
+test('genre and exact premiere year filters intersect; originals stay ordered',()=>{assert.deepEqual(D.filter([a,b,c],'Drama','2020'),[a]);assert.deepEqual(D.filter([a,b,c],'Drama').map(s=>s.id),[2,1]);assert.deepEqual(D.filter([a,b,c],'','', 'newest').map(s=>s.id),[2,1,3]);});
+test('missing metadata remains discoverable',()=>{assert.deepEqual(D.filter([a,c],'Unclassified','Unknown'),[c]);});
+test('top five enforces limit but permits removal when full',()=>{const full=Array.from({length:5},(_,i)=>({...a,id:i+1}));assert.throws(()=>D.toggle(full,{...b,id:6}),/full/);assert.equal(D.toggle(full,a).length,4);assert.equal(full.length,5);});
+test('ranking moves preserve uniqueness and obey boundaries',()=>{assert.deepEqual(D.move([a,b,c],1,1),[b,a,c]);assert.deepEqual(D.move([a,b],1,-1),[a,b]);assert.deepEqual(D.move([a,b],42,1),[a,b]);});
+test('legacy backups migrate with empty favourites',()=>{assert.deepEqual(D.backup({version:1,library:[]},C),{version:2,library:[],favourites:[]});});
+test('v2 backup round-trip retains ranking independently of watchlist',()=>{const data=D.backup({version:2,library:[],favourites:[b,a]},C);assert.deepEqual(D.backup(JSON.parse(JSON.stringify(data)),C),data);assert.deepEqual(data.favourites.map(s=>s.id),[2,1]);});
+test('invalid and duplicate favourites reject the entire restore',()=>{assert.throws(()=>D.backup({version:2,library:[],favourites:[a,a]},C));assert.throws(()=>D.backup({version:2,library:[]},C));assert.throws(()=>D.backup({version:3,library:[]},C));});
